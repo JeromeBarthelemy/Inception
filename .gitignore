@@ -1,0 +1,7 @@
+# Secrets et variables d'environnement — JAMAIS dans git
+srcs/.env
+secrets/
+
+# Fichiers système / éditeurs
+.DS_Store
+*.swp
