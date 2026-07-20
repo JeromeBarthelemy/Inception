@@ -1,6 +1,6 @@
 FROM alpine:3.23
 
-RUN apk update && apk add --no-cache mariadb mariadb-client
+RUN apk add --no-cache mariadb mariadb-client
 
 # Disable the default config's skip-networking so the DB is reachable over TCP
 RUN sed -i 's/^skip-networking/#skip-networking/' /etc/my.cnf.d/mariadb-server.cnf
