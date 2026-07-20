@@ -108,8 +108,9 @@ Make targets
 │ clean      │ down plus removal of the Docker volumes               │
 ├────────────┼───────────────────────────────────────────────────────┤
 │ fclean     │ clean plus removal of images and of the data on disk  │
+│            │   (user password needed)                              │
 ├────────────┼───────────────────────────────────────────────────────┤
-│ re         │ fclean then a full rebuild                            │
+│ re         │ fclean then a full rebuild (user password needed)     │
 ├────────────┼───────────────────────────────────────────────────────┤
 │ logs       │ Follow all logs                                       │
 ├────────────┼───────────────────────────────────────────────────────┤
@@ -204,19 +205,22 @@ make fclean therefore removes those directories explicitly.
 
 Troubleshooting
 
-┌────────────────────────────────┬─────────────────────────────────────────────────────────────────────┐
-│            Symptom             │                            Likely cause                             │
-├────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ 502 Bad Gateway                │ php-fpm not reachable — check fastcgi_pass and that wordpress is up │
-├────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ 404 on every page              │ wp_data empty or not mounted — check the volume                     │
-├────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ Infinite redirect on /wp-admin │ fastcgi_param HTTPS on; missing from the NGINX config               │
-├────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ Container stuck Restarting     │ Read its logs; often a failed dependency at startup                 │
-├────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ host not found in upstream     │ NGINX started before WordPress had a DNS entry                      │
-└────────────────────────────────┴─────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────┬─────────────────────────────────────────────────────────────────────┐
+│            Symptom                   │                            Likely cause                             │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ 502 Bad Gateway                      │ php-fpm not reachable — check fastcgi_pass and that wordpress is up │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ 404 on every page                    │ wp_data empty or not mounted — check the volume                     │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ Infinite redirect on /wp-admin       │ fastcgi_param HTTPS on; missing from the NGINX config               │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ Container stuck Restarting           │ Read its logs; often a failed dependency at startup                 │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ host not found in upstream           │ NGINX started before WordPress had a DNS entry                      │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ rm: Permission denied on make fclean │ Data files are owned by in-container users; the recipe needs sudo   │
+└──────────────────────────────────────┴─────────────────────────────────────────────────────────────────────┘
+
 
 When testing, never use curl -s: it silences connection errors, so a failed
 request looks the same as an empty response.

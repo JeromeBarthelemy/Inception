@@ -82,7 +82,7 @@ else:
 
 make logs
 
-Data and persistence
+## Data and persistence
 
 Content is stored outside the containers, in /home/jbarthel/data. It survives
 make down, a reboot, and a rebuild of the images.
@@ -90,3 +90,7 @@ make down, a reboot, and a rebuild of the images.
 make fclean and make re erase everything: database, articles, users,
 uploaded media. After either of them, the next make reinstalls a blank
 WordPress site. Use them only when a fresh installation is what you want.
+**Warning:** `make fclean` and `make re` delete the data with `sudo`, so they ask for
+your user password. This is required because the data files are owned by users that
+exist inside the containers, not on the host — your account cannot remove them
+directly.
