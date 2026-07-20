@@ -69,28 +69,34 @@ The reference copies are kept in a password manager, not on disk.
 
 ```sh
 make ps
+```
 
-The three containers should show Up.
+The three containers should show `Up`.
 
+```sh
 curl -kI https://jbarthel.42.fr
+```
 
-Should answer HTTP/1.1 200 OK. The -k flag tells curl to accept the
+Should answer `HTTP/1.1 200 OK`. The `-k` flag tells curl to accept the
 self-signed certificate.
 
-If a service is listed as Restarting, read its logs before doing anything
+If a service is listed as `Restarting`, read its logs before doing anything
 else:
 
+```sh
 make logs
+```
 
 ## Data and persistence
 
-Content is stored outside the containers, in /home/jbarthel/data. It survives
-make down, a reboot, and a rebuild of the images.
+Content is stored outside the containers, in `/home/jbarthel/data`. It survives
+`make down`, a reboot, and a rebuild of the images.
 
-make fclean and make re erase everything: database, articles, users,
-uploaded media. After either of them, the next make reinstalls a blank
+**`make fclean` and `make re` erase everything**: database, articles, users,
+uploaded media. After either of them, the next `make` reinstalls a blank
 WordPress site. Use them only when a fresh installation is what you want.
-**Warning:** `make fclean` and `make re` delete the data with `sudo`, so they ask for
-your user password. This is required because the data files are owned by users that
-exist inside the containers, not on the host — your account cannot remove them
-directly.
+
+**Warning:** `make fclean` and `make re` delete the data with `sudo`, so they ask
+for your user password. This is required because the data files are owned by
+users that exist inside the containers, not on the host — your account cannot
+remove them directly.

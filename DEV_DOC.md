@@ -15,14 +15,17 @@ Verify:
 docker --version
 docker compose version
 make --version
+```
 
-Repository layout
+## Repository layout
 
+```
 .
 ├── Makefile
 ├── README.md
 ├── USER_DOC.md
 ├── DEV_DOC.md
+├── .gitignore
 ├── .env.example
 ├── secrets/                     (git-ignored)
 │   ├── db_root_password.txt
@@ -44,183 +47,197 @@ Repository layout
         └── nginx/
             ├── Dockerfile
             └── conf/docker.conf
+```
 
-Setting up a fresh environment
+`.gitignore` excludes `srcs/.env` and `secrets/` — no credential has ever been
+committed to this repository.
 
-1. Domain resolution
+## Setting up a fresh environment
 
-The site is served on jbarthel.42.fr, which must resolve to the local machine:
+### 1. Domain resolution
 
+The site is served on `jbarthel.42.fr`, which must resolve to the local machine:
+
+```sh
 echo "127.0.0.1 jbarthel.42.fr" | sudo tee -a /etc/hosts
 ping -c1 jbarthel.42.fr
+```
 
-2. Environment file
+### 2. Environment file
 
-srcs/.env is not committed. Create it from the template:
+`srcs/.env` is not committed. Create it from the template:
 
+```sh
 cp .env.example srcs/.env
+```
 
 It holds only non-sensitive values: domain name, database name, WordPress user
 names, site title and URL. No password belongs in this file.
 
-3. Secrets
+### 3. Secrets
 
 Create one file per password, each containing the password and nothing else:
 
+```sh
 mkdir -p secrets
 printf '%s' 'CHANGE_ME' > secrets/db_root_password.txt
 printf '%s' 'CHANGE_ME' > secrets/db_password.txt
 printf '%s' 'CHANGE_ME' > secrets/wp_admin_password.txt
 printf '%s' 'CHANGE_ME' > secrets/wp_user_password.txt
+```
 
-printf is used rather than echo to avoid a trailing newline, which would
+`printf` is used rather than `echo` to avoid a trailing newline, which would
 become part of the password.
 
-Docker mounts these files at /run/secrets/<name> inside the containers, in
+Docker mounts these files at `/run/secrets/<name>` inside the containers, in
 memory. The init scripts read them from there. No password is ever passed as an
-environment variable, and none appears in docker inspect.
+environment variable, and none appears in `docker inspect`.
 
 Check before the first commit that nothing sensitive is tracked:
 
+```sh
 git status
 git check-ignore -v srcs/.env secrets/db_password.txt
+```
 
-4. Build and start
+### 4. Build and start
 
+```sh
 make
+```
 
-This creates /home/jbarthel/data/{mariadb,wordpress} if needed, builds the
+This creates `/home/jbarthel/data/{mariadb,wordpress}` if needed, builds the
 three images, and starts the stack.
 
-Make targets
+## Make targets
 
-┌────────────┬───────────────────────────────────────────────────────┐
-│   Target   │                        Effect                         │
-├────────────┼───────────────────────────────────────────────────────┤
-│ all / make │ Create data directories, build, start                 │
-├────────────┼───────────────────────────────────────────────────────┤
-│ build      │ Build the images without starting                     │
-├────────────┼───────────────────────────────────────────────────────┤
-│ up         │ Same as all                                           │
-├────────────┼───────────────────────────────────────────────────────┤
-│ down       │ Stop and remove containers; volumes and data are kept │
-├────────────┼───────────────────────────────────────────────────────┤
-│ clean      │ down plus removal of the Docker volumes               │
-├────────────┼───────────────────────────────────────────────────────┤
-│ fclean     │ clean plus removal of images and of the data on disk  │
-│            │   (user password needed)                              │
-├────────────┼───────────────────────────────────────────────────────┤
-│ re         │ fclean then a full rebuild (user password needed)     │
-├────────────┼───────────────────────────────────────────────────────┤
-│ logs       │ Follow all logs                                       │
-├────────────┼───────────────────────────────────────────────────────┤
-│ ps         │ Container status                                      │
-└────────────┴───────────────────────────────────────────────────────┘
+| Target | Effect |
+|---|---|
+| `all` / `make` | Create data directories, build, start |
+| `build` | Build the images without starting |
+| `up` | Same as `all` |
+| `down` | Stop and remove containers; volumes and data are kept |
+| `clean` | `down` plus removal of the Docker volumes |
+| `fclean` | `clean` plus removal of images and of the data on disk |
+| `re` | `fclean` then a full rebuild |
+| `logs` | Follow all logs |
+| `ps` | Container status |
+
+`fclean` and `re` remove the data with `sudo` and will ask for your user
+password. This is required because the data files are owned by users that exist
+inside the containers, not on the host.
 
 Compose is always invoked as
-docker compose -f srcs/docker-compose.yml <command>, since the Compose file
+`docker compose -f srcs/docker-compose.yml <command>`, since the Compose file
 is not at the repository root.
 
-Because the Compose file lives in srcs/, the project name is srcs. Resources
-are therefore named srcs_inception (network), srcs_db_data and srcs_wp_data
+Because the Compose file lives in `srcs/`, the project name is `srcs`. Resources
+are therefore named `srcs_inception` (network), `srcs_db_data` and `srcs_wp_data`
 (volumes).
 
-Useful commands
+## Useful commands
 
-Containers
+### Containers
 
+```sh
 docker compose -f srcs/docker-compose.yml ps
 docker compose -f srcs/docker-compose.yml logs -f nginx
 docker exec -it nginx sh
 docker exec nginx ps aux
+```
 
-ps aux inside a container should show the service itself as PID 1 — not a
-shell or a wrapper script. This matters: PID 1 is what receives SIGTERM when
+`ps aux` inside a container should show the service itself as PID 1 — not a
+shell or a wrapper script. This matters: PID 1 is what receives `SIGTERM` when
 Docker stops the container, so a wrong PID 1 means a forced kill after the
 10-second grace period.
 
-Database
+### Database
 
+```sh
 docker exec -it mariadb mariadb -u root -p
+```
 
+```sql
 SHOW DATABASES;
 USE wordpress;
 SHOW TABLES;
 SELECT user_login, user_email FROM wp_users;
+```
 
-Volumes and network
+### Volumes and network
 
+```sh
 docker volume ls
 docker volume inspect srcs_wp_data
 docker network inspect srcs_inception
+```
 
-Configuration
+### Configuration
 
+```sh
 docker compose -f srcs/docker-compose.yml config
 docker exec nginx nginx -t
+```
 
-config prints the fully resolved Compose file with .env values substituted —
+`config` prints the fully resolved Compose file with `.env` values substituted —
 useful to confirm that no secret leaks into it.
 
-Note that nginx -t resolves upstream host names at parse time. Running it in a
+Note that `nginx -t` resolves upstream host names at parse time. Running it in a
 container that is not attached to the project network fails with
-host not found in upstream "wordpress", even though the configuration is
+`host not found in upstream "wordpress"`, even though the configuration is
 correct.
 
-How data persists
+## How data persists
 
-Two named volumes are declared with driver_opts so that their contents live in
+Two named volumes are declared with `driver_opts` so that their contents live in
 a known host directory:
 
-┌─────────┬────────────────┬───────────────────────────────┐
-│ Volume  │ Container path │           Host path           │
-├─────────┼────────────────┼───────────────────────────────┤
-│ db_data │ /var/lib/mysql │ /home/jbarthel/data/mariadb   │
-├─────────┼────────────────┼───────────────────────────────┤
-│ wp_data │ /var/www/html  │ /home/jbarthel/data/wordpress │
-└─────────┴────────────────┴───────────────────────────────┘
+| Volume | Container path | Host path |
+|---|---|---|
+| `db_data` | `/var/lib/mysql` | `/home/jbarthel/data/mariadb` |
+| `wp_data` | `/var/www/html` | `/home/jbarthel/data/wordpress` |
 
-wp_data is mounted into both wordpress and nginx: php-fpm executes the PHP
+`wp_data` is mounted into both `wordpress` and `nginx`: php-fpm executes the PHP
 files, NGINX serves the static ones. It is the same data seen by two containers.
 
 Both init scripts are guarded so that initialisation happens only once:
 
-- tools/init.sh checks [ ! -d /var/lib/mysql/mysql ] before bootstrapping
-the database
-- tools/setup.sh checks [ ! -f wp-config.php ] before installing WordPress
+- `tools/init.sh` checks `[ ! -d /var/lib/mysql/mysql ]` before bootstrapping
+  the database
+- `tools/setup.sh` checks `[ ! -f wp-config.php ]` before installing WordPress
 
-This is why make down && make preserves everything while make re starts from
-a blank slate. To verify that the guards work after any change:
+This is why `make down && make` preserves everything while `make re` starts from
+a blank slate. To verify the guards after any change:
 
+```sh
 make down && make
 sleep 15
-docker compose -f srcs/docker-compose.yml logs wordpress | grep -ci "core install"
+docker compose -f srcs/docker-compose.yml logs wordpress | grep -c "First boot"
+```
 
-The count must be 0. A non-zero value means WordPress reinstalled itself,
-which would destroy existing content on every restart.
+The count must be `0` after a restart, and `1` after `make re`. Checking the
+database directly is even more reliable — a fresh install contains only the
+default "Hello world!" article:
 
-Note that docker compose down -v removes the volume declarations but does not
+```sh
+docker exec -it mariadb mariadb -u root -p -e \
+  "USE wordpress; SELECT ID, post_title FROM wp_posts WHERE post_type='post';"
+```
+
+Note that `docker compose down -v` removes the volume declarations but does not
 delete the host directories, because the volumes are backed by bind mounts.
-make fclean therefore removes those directories explicitly.
+`make fclean` therefore removes those directories explicitly.
 
-Troubleshooting
+## Troubleshooting
 
-┌──────────────────────────────────────┬─────────────────────────────────────────────────────────────────────┐
-│            Symptom                   │                            Likely cause                             │
-├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ 502 Bad Gateway                      │ php-fpm not reachable — check fastcgi_pass and that wordpress is up │
-├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ 404 on every page                    │ wp_data empty or not mounted — check the volume                     │
-├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ Infinite redirect on /wp-admin       │ fastcgi_param HTTPS on; missing from the NGINX config               │
-├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ Container stuck Restarting           │ Read its logs; often a failed dependency at startup                 │
-├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ host not found in upstream           │ NGINX started before WordPress had a DNS entry                      │
-├──────────────────────────────────────┼─────────────────────────────────────────────────────────────────────┤
-│ rm: Permission denied on make fclean │ Data files are owned by in-container users; the recipe needs sudo   │
-└──────────────────────────────────────┴─────────────────────────────────────────────────────────────────────┘
+| Symptom | Likely cause |
+|---|---|
+| `502 Bad Gateway` | php-fpm not reachable — check `fastcgi_pass` and that `wordpress` is up |
+| `404` on every page | `wp_data` empty or not mounted — check the volume |
+| Infinite redirect on `/wp-admin` | `fastcgi_param HTTPS on;` missing from the NGINX config |
+| Container stuck `Restarting` | Read its logs; often a failed dependency at startup |
+| `host not found in upstream` | NGINX started before WordPress had a DNS entry |
+| `rm: Permission denied` on `make fclean` | Data files are owned by in-container users; the recipe needs `sudo` |
 
-
-When testing, never use curl -s: it silences connection errors, so a failed
+When testing, never use `curl -s`: it silences connection errors, so a failed
 request looks the same as an empty response.
