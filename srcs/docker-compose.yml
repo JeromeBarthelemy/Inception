@@ -30,6 +30,19 @@ services:
       - wp_data:/var/www/html
     networks:
       - inception
+  nginx:
+    build: ./requirements/nginx
+    image: nginx
+    container_name: nginx
+    restart: always
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      -  wp_data:/var/www/html 
+    networks:
+      - inception
 
 networks:
   inception:
