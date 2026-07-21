@@ -69,11 +69,12 @@ image, even if a later layer deletes the file.
 
 ### Docker network vs host network
 
-Each container joins a user-defined bridge network named `inception`. Docker
-runs an embedded DNS resolver on that network, so containers reach each other
-by service name: NGINX forwards PHP requests to `wordpress:9000` without ever
-knowing an IP address. This is why the legacy `--link` flag is unnecessary —
-and why the subject forbids it.
+Each container joins a user-defined bridge network. It is declared as
+`inception` in `docker-compose.yml`; Docker prefixes it with the Compose project
+name, so the actual network is `srcs_inception`. Docker runs an embedded DNS
+resolver on it, so containers reach each other by service name: NGINX forwards
+PHP requests to `wordpress:9000` without ever knowing an IP address. This is why
+the legacy `--link` flag is unnecessary — and why the subject forbids it.
 
 The isolation is the point. Only NGINX publishes a port to the host. MariaDB
 listens on 3306 and WordPress on 9000, but both are reachable only from inside
@@ -90,8 +91,10 @@ A bind mount maps a host path straight into a container. It is simple, but the
 container depends on the host's directory layout, and Docker manages nothing.
 
 A named volume is managed by Docker: it has a name, a lifecycle, and it survives
-`docker compose down`. This project uses two named volumes, `db_data` and
-`wp_data`, as the subject requires.
+`docker compose down`. This project uses two named volumes, as the subject
+requires. They are declared as `db_data` and `wp_data` in `docker-compose.yml`;
+like the network, Docker prefixes them with the Compose project name, so the
+actual volumes are `srcs_db_data` and `srcs_wp_data`.
 
 There is a subtlety worth knowing here. Both volumes are declared with
 `driver_opts` so their contents land in `/home/jbarthel/data`, as the subject
