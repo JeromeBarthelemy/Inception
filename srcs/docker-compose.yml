@@ -43,6 +43,13 @@ services:
       -  wp_data:/var/www/html 
     networks:
       - inception
+  redis:
+    build: ./requirements/bonus/redis
+    image: redis:1.0
+    container_name: redis
+    networks:
+      - inception
+    restart: always
 
 networks:
   inception:
