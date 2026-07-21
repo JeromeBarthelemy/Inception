@@ -21,7 +21,8 @@ RUN apk add --no-cache \
     php83-simplexml \
     php83-iconv \
     curl \
-    mariadb-client
+    mariadb-client \
+    php83-pecl-redis
 
 # wp-cli's shebang calls "php", but Alpine installs the binary as "php83"
 RUN ln -sf /usr/bin/php83 /usr/bin/php
