@@ -56,10 +56,12 @@ are not sensitive: the domain name, the database name, the WordPress user name.
 Those live in `srcs/.env`, which is git-ignored, with a `.env.example` committed
 to document the required keys.
 
-Docker secrets are mounted as files under `/run/secrets/` in a tmpfs — in
-memory, never written to the container filesystem, and absent from
-`docker inspect`. Every password in this project goes through that path: the
-init scripts read the file, never an environment variable.
+Docker mounts each secret read-only under `/run/secrets/<name>`. In this
+project (standalone Compose with file-based secrets) it is a read-only bind
+mount of the host file — the password is never copied into an image layer and
+never appears as an environment variable in `docker inspect`. Every password
+goes through that path: the init scripts read the file, never an environment
+variable.
 
 Neither mechanism puts anything in the image itself. A password baked into a
 Dockerfile stays in the layer history forever, readable by anyone who pulls the
