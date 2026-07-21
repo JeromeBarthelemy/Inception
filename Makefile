@@ -25,7 +25,7 @@ clean: down
 
 fclean: clean
 	sudo rm -rf $(HOME)/data/mariadb $(HOME)/data/wordpress
-	-docker image rm -f mariadb wordpress nginx
+	-docker image rm -f mariadb:1.0 wordpress:1.0 nginx:1.0
 
 re: fclean all
 
