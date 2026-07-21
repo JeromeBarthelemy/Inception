@@ -51,6 +51,13 @@ services:
     networks:
       - inception
     restart: always
+  adminer:
+    build: ./requirements/bonus/adminer
+    image: adminer:1.0
+    container_name: adminer
+    networks:
+      - inception
+    restart: always
 
 networks:
   inception:
