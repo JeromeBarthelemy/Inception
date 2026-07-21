@@ -38,6 +38,7 @@ services:
     restart: always
     depends_on:
       - wordpress
+      - adminer
     ports:
       - "443:443"
     volumes:
