@@ -17,6 +17,34 @@ docker compose version
 make --version
 ```
 
+## Connecting to the VM over SSH
+
+The stack runs inside a VirtualBox VM. Working over SSH rather than in the
+VirtualBox console window is usually more convenient: it gives a resizable
+terminal, a scrollback buffer, and copy-paste with the host.
+
+The VM uses NAT networking, so the guest is not reachable directly. A port
+forwarding rule maps port 2222 on the host to port 22 in the guest. Create it
+once, on the **host**, with the VM powered off:
+
+```bash
+VBoxManage modifyvm "Inception" --natpf1 "SSH,tcp,,2222,,22"
+VBoxManage showvminfo "Inception" | grep -i "NIC 1 Rule"
+
+Inside the guest, the SSH server must be installed and enabled:
+
+sudo apt install openssh-server
+sudo systemctl enable --now ssh
+systemctl is-active ssh
+
+Then, from the host:
+
+ssh -p 2222 jbarthel@localhost
+
+The port forwarding rule is VirtualBox configuration, stored on the host. It is
+not part of this repository and has to be recreated on any machine where the VM
+is imported.
+
 ## Repository layout
 
 ```
