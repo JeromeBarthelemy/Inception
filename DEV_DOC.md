@@ -62,7 +62,7 @@ The site and its bonus services are served on subdomains of `jbarthel.42.fr`,
 which must all resolve to the local machine:
 
 ```sh
-echo "127.0.0.1 jbarthel.42.fr adminer.jbarthel.42.fr static.jbarthel.42.fr" | sudo tee -a /etc/hosts
+echo "127.0.0.1 jbarthel.42.fr adminer.jbarthel.42.fr static.jbarthel.42.fr netdata.jbarthel.42.fr" | sudo tee -a /etc/hosts
 ping -c1 jbarthel.42.fr
 ```
 
@@ -283,6 +283,26 @@ require changing that address: vsftpd would otherwise advertise its internal
 
 This is the only service besides nginx that publishes ports. FTP is not HTTP,
 so nginx cannot proxy it.
+
+### Netdata (monitoring)
+
+`netdata -D` keeps the daemon in the foreground as PID 1. The container gets no
+volume, no secret and no privileges.
+
+`conf/netdata.conf` sets only two things: `[db] mode = ram`, so metrics stay in
+memory and no volume is needed, and `[web] bind to = *` with the port nginx
+proxies to. Note that the configuration schema changed across versions —
+`memory mode` and `history` no longer exist, and unknown keys are ignored
+silently. Read the daemon's effective configuration with
+`docker exec netdata wget -qO- http://localhost:19999/netdata.conf`: keys left
+at their default are commented out, applied ones are not.
+
+Telemetry is disabled by the `/etc/netdata/.opt-out-from-anonymous-statistics`
+sentinel file created in the Dockerfile; there is no config key for it in this
+version.
+
+`curl -I` returns `400` on this vhost: netdata does not implement HEAD. Test it
+with a GET.
 
 ## Troubleshooting
 

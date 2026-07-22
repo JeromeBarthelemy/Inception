@@ -34,10 +34,21 @@ Four bonus containers run alongside the mandatory stack:
 | `adminer` | Web database client, served by nginx on `adminer.jbarthel.42.fr` | none |
 | `static` | Static documentation site, no PHP, reverse-proxied by nginx on `static.jbarthel.42.fr` | none |
 | `ftp` | vsftpd server giving access to the WordPress volume, so files can be dropped straight into the site | `21` and `21100-21105` |
+| `netdata` | Real-time monitoring dashboard, reverse-proxied by nginx on `netdata.jbarthel.42.fr` | none |
 
 Only `ftp` publishes ports besides nginx: FTP is not HTTP, so nginx cannot
 proxy it. The other three are reachable only through nginx or from inside the
 Docker network.
+
+Netdata reports the host machine's CPU and memory, because Docker does not
+namespace `/proc`: the kernel counters a container reads are the host's. It is
+granted no privileges, no host mounts and no access to the Docker socket, so it
+cannot break anything down per container — it observes the machine, not the
+infrastructure.
+
+Both outbound channels are disabled: anonymous statistics through a sentinel
+file, and Netdata Cloud through `cloud.d/cloud.conf`. Without the latter the
+dashboard tries to load a sign-in frame from `app.netdata.cloud`.
 
 ### Virtual Machine vs Docker
 

@@ -101,6 +101,12 @@ runs as, and it owns every file of the site. Anonymous access is refused.
 FTP sends credentials in clear text, which is why the server is only reachable
 from the local machine.
 
+### Monitoring — https://netdata.jbarthel.42.fr
+
+A real-time dashboard showing CPU, memory, network and disk activity. No login
+is required: the dashboard is only reachable from this machine, and it displays
+no user data.
+
 ## Where the credentials are
 
 **No password is stored in this repository.** They are in the `secrets/`
