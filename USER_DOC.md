@@ -48,12 +48,13 @@ If the address does not resolve, the machine is missing its hosts entry. See
 
 Go to `https://jbarthel.42.fr/wp-admin`.
 
-Two accounts exist:
+Two accounts exist. Their names come from `srcs/.env`, so they are whatever was
+set there before the first boot — `jbarthel` and `guest` on this installation:
 
-| Account | Role | Can do |
-|---|---|---|
-| `jbarthel` | Administrator | Everything: settings, themes, users, content |
-| `guest` | Author | Write and publish their own articles only |
+| Account | Set by | Role | Can do |
+|---|---|---|---|
+| `jbarthel` | `WP_ADMIN_USER` | Administrator | Everything: settings, themes, users, content |
+| `guest` | `WP_USER` | Author | Write and publish their own articles only |
 
 ## Bonus services
 
@@ -70,9 +71,9 @@ Log in with:
 |----------|------------|
 | System   | MySQL      |
 | Server   | `mariadb`  |
-| Username | `wpuser`   |
+| Username | the value of `MYSQL_USER` in `srcs/.env` |
 | Password | the content of `secrets/db_password.txt` |
-| Database | `wordpress`|
+| Database | the value of `MYSQL_DATABASE` in `srcs/.env` |
 
 `mariadb` is the container name: the database is never published on a port, so
 it is only reachable from inside the Docker network — which is exactly why
