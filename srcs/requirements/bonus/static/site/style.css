@@ -1,0 +1,96 @@
+:root {
+    --bg: #16181d;
+    --panel: #1e2128;
+    --text: #d8dae0;
+    --muted: #969ba6;
+    --accent: #6ea8fe;
+    --border: #2c3039;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0 1.5rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.7;
+}
+
+header, nav, main, footer {
+    max-width: 46rem;
+    margin: 0 auto;
+}
+
+header {
+    padding: 3rem 0 1.5rem;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+}
+
+nav {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+section {
+    padding: 2.5rem 0 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+section:last-of-type {
+    border-bottom: none;
+}
+
+h2 {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+}
+
+ul {
+    padding-left: 1.2rem;
+}
+
+li {
+    margin-bottom: 0.4rem;
+}
+
+code {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1em 0.4em;
+    font-size: 0.9em;
+}
+
+footer {
+    padding-top: 3rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}

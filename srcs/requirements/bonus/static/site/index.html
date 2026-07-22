@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inception — Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Inception</h1>
+        <p class="subtitle">A small WordPress infrastructure, built from scratch with Docker.</p>
+    </header>
+
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#user">User guide</a>
+        <a href="#dev">Developer guide</a>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                This project runs a complete WordPress stack inside a virtual machine,
+                where every image is written by hand from an Alpine base — no pre-built
+                images pulled from Docker Hub.
+            </p>
+            <p>Three mandatory services, each in its own container:</p>
+            <ul>
+                <li><strong>nginx</strong> — the only entry point, TLS only, listening on port 443.</li>
+                <li><strong>wordpress</strong> — WordPress running on php-fpm, with no web server of its own.</li>
+                <li><strong>mariadb</strong> — the database, never exposed outside the Docker network.</li>
+            </ul>
+            <p>
+                They talk to each other over a private Docker network, and the site
+                itself is served at <code>https://jbarthel.42.fr</code>. A few bonus
+                containers sit alongside them: a Redis object cache, Adminer for
+                database administration, and the static server rendering this page.
+            </p>
+        </section>
+
+        <section id="user">
+            <h2>User guide</h2>
+            <p>
+                The public site lives at <code>https://jbarthel.42.fr</code>. The
+                certificate is self-signed, so the browser shows a warning on the first
+                visit — accepting it is expected here.
+            </p>
+            <p>
+                The administration panel is at <code>/wp-admin</code>. Two accounts
+                exist: an administrator and a regular author, so the difference in
+                permissions can be shown live.
+            </p>
+            <p>
+                Credentials are never stored in the repository. They live in the
+                <code>secrets/</code> directory on the machine running the stack, which
+                is excluded from git. Anyone rebuilding the project has to recreate
+                those files themselves.
+            </p>
+        </section>
+
+        <section id="dev">
+            <h2>Developer guide</h2>
+            <p>Requirements: Docker, Docker Compose and <code>make</code>.</p>
+            <p>
+                Running <code>make</code> builds every image and starts the stack.
+                <code>make down</code> stops it, and <code>make fclean</code> removes
+                images and volumes for a clean rebuild.
+            </p>
+            <p>
+                Before the first build, the <code>secrets/</code> files must exist and
+                the domain has to resolve locally — add
+                <code>jbarthel.42.fr</code> to <code>/etc/hosts</code>, pointing at
+                <code>127.0.0.1</code>.
+            </p>
+            <p>
+                Data survives restarts because both the database and the WordPress
+                files are bind-mounted into <code>~/data</code> on the host. Deleting
+                that directory is what actually resets the installation — stopping the
+                containers does not.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>42 — Inception · jbarthel</p>
+    </footer>
+</body>

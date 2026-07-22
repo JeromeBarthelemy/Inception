@@ -42,7 +42,7 @@ services:
     ports:
       - "443:443"
     volumes:
-      -  wp_data:/var/www/html 
+      - wp_data:/var/www/html
     networks:
       - inception
   redis:
@@ -58,6 +58,12 @@ services:
     container_name: adminer
     networks:
       - inception
+    restart: always
+  static:
+    build: ./requirements/bonus/static
+    image: static:1.0
+    container_name: static
+    networks: [inception]
     restart: always
 
 networks:
