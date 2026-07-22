@@ -27,6 +27,8 @@ make --version
 ├── DEV_DOC.md
 ├── .gitignore
 ├── .env.example
+├── tools/
+│   └── healthcheck.sh
 ├── secrets/                     (git-ignored)
 │   ├── db_root_password.txt
 │   ├── db_password.txt
@@ -45,9 +47,28 @@ make --version
         │   ├── Dockerfile
         │   ├── conf/www.conf
         │   └── tools/setup.sh
-        └── nginx/
-            ├── Dockerfile
-            └── conf/docker.conf
+        ├── nginx/
+        │   ├── Dockerfile
+        │   └── conf/docker.conf
+        └── bonus/
+            ├── redis/
+            │   ├── Dockerfile
+            │   └── conf/redis.conf
+            ├── adminer/
+            │   ├── Dockerfile
+            │   └── conf/www.conf
+            ├── static/
+            │   ├── Dockerfile
+            │   └── site/
+            │       ├── index.html
+            │       └── style.css
+            ├── ftp/
+            │   ├── Dockerfile
+            │   ├── conf/vsftpd.conf
+            │   └── tools/setup.sh
+            └── netdata/
+                ├── Dockerfile
+                └── conf/netdata.conf
 ```
 
 `.gitignore` excludes `srcs/.env` and `secrets/` — no credential has ever been

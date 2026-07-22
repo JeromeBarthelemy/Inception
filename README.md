@@ -134,7 +134,7 @@ rebuild" would silently restart on the old database.
 
 - Docker Engine and the Docker Compose plugin
 - `make`
-- An entry in `/etc/hosts`: `127.0.0.1 jbarthel.42.fr adminer.jbarthel.42.fr static.jbarthel.42.fr`
+- An entry in `/etc/hosts`: `127.0.0.1 jbarthel.42.fr adminer.jbarthel.42.fr static.jbarthel.42.fr netdata.jbarthel.42.fr`
 
 ### Setup
 

@@ -11,4 +11,8 @@ RUN chmod +x /setup.sh
 
 EXPOSE 21
 
+# vsftpd installs no SIGTERM handler and the kernel ignores default signal
+# actions for PID 1, so SIGTERM would stall until Docker's 10s timeout.
+STOPSIGNAL SIGKILL
+
 CMD ["/setup.sh"]

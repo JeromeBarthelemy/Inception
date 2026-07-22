@@ -7,8 +7,17 @@ fails=0
 ok() { printf '  \033[32m[ OK ]\033[0m %s\n' "$1"; }
 ko() { printf '  \033[31m[FAIL]\033[0m %s\n' "$1"; fails=$((fails + 1)); }
 
+echo "== Waiting for the stack =="
+i=0
+while [ "$i" -lt 30 ]; do
+    [ "$(curl -kso /dev/null -w '%{http_code}' "$DOMAIN")" = "200" ] && break
+    i=$((i + 1))
+    sleep 1
+done
+[ "$i" -lt 30 ] && ok "ready after ${i}s" || ko "not ready after 30s"
+
 echo "== Containers running =="
-for s in mariadb wordpress nginx; do
+for s in mariadb wordpress nginx redis adminer static ftp netdata; do
     state=$(docker inspect -f '{{.State.Status}}' "$s" 2>/dev/null)
     [ "$state" = "running" ] && ok "$s is running" || ko "$s is ${state:-absent}"
 done
@@ -24,10 +33,35 @@ check_pid1() {
 check_pid1 mariadb   mariadbd
 check_pid1 wordpress php-fpm
 check_pid1 nginx     nginx
+check_pid1 redis     redis-server
+check_pid1 adminer   php-fpm
+check_pid1 static    httpd
+check_pid1 ftp       vsftpd
+check_pid1 netdata   netdata
 
 echo "== HTTPS responds =="
 code=$(curl -kso /dev/null -w '%{http_code}' "$DOMAIN")
 [ "$code" = "200" ] && ok "GET / -> $code" || ko "GET / -> $code"
+
+echo "== Bonus vhosts respond =="
+for h in adminer static netdata; do
+    code=$(curl -kso /dev/null -w '%{http_code}' "https://$h.jbarthel.42.fr")
+    [ "$code" = "200" ] && ok "$h -> $code" || ko "$h -> $code"
+done
+
+echo "== FTP =="
+if [ -f secrets/ftp_password.txt ]; then
+    curl -so /dev/null --max-time 5 -u "nobody:$(cat secrets/ftp_password.txt)" ftp://127.0.0.1/ \
+        && ok "authenticated listing" || ko "authenticated listing failed"
+else
+    ko "secrets/ftp_password.txt missing"
+fi
+curl -so /dev/null --max-time 5 ftp://127.0.0.1/ \
+    && ko "anonymous FTP allowed" || ok "anonymous FTP refused"
+
+echo "== Redis =="
+[ "$(docker exec redis redis-cli ping 2>/dev/null)" = "PONG" ] \
+    && ok "redis responds to PING" || ko "redis does not respond"
 
 echo "== TLS 1.2 accepted =="
 curl -kso /dev/null --tlsv1.2 --tls-max 1.2 "$DOMAIN" \
@@ -42,7 +76,7 @@ fi
 
 echo "== Network =="
 n=$(docker network inspect srcs_inception -f '{{len .Containers}}' 2>/dev/null)
-[ "$n" = "3" ] && ok "3 containers on srcs_inception" || ko "${n:-0} on srcs_inception (want 3)"
+[ "$n" = "8" ] && ok "8 containers on srcs_inception" || ko "${n:-0} on srcs_inception (want 8)"
 
 echo "== Volumes =="
 for v in srcs_db_data srcs_wp_data; do
