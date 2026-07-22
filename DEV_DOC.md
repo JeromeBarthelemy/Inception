@@ -31,7 +31,8 @@ make --version
 │   ├── db_root_password.txt
 │   ├── db_password.txt
 │   ├── wp_admin_password.txt
-│   └── wp_user_password.txt
+│   ├── wp_user_password.txt
+│   └── ftp_password.txt
 └── srcs/
     ├── docker-compose.yml
     ├── .env                     (git-ignored)
@@ -86,20 +87,22 @@ printf '%s' 'CHANGE_ME' > secrets/db_root_password.txt
 printf '%s' 'CHANGE_ME' > secrets/db_password.txt
 printf '%s' 'CHANGE_ME' > secrets/wp_admin_password.txt
 printf '%s' 'CHANGE_ME' > secrets/wp_user_password.txt
+printf '%s' 'CHANGE_ME' > secrets/ftp_password.txt
 ```
 
 `printf` is used rather than `echo` to avoid a trailing newline, which would
 become part of the password.
 
-Docker mounts these files at `/run/secrets/<name>` inside the containers, in
-memory. The init scripts read them from there. No password is ever passed as an
-environment variable, and none appears in `docker inspect`.
+Docker mounts these files at `/run/secrets/<name>` inside the containers, as
+read-only bind mounts of the host files. The init scripts read them from there.
+No password is ever passed as an environment variable, and none appears in
+`docker inspect` — only the path of the secret does.
 
 Check before the first commit that nothing sensitive is tracked:
 
 ```sh
 git status
-git check-ignore -v srcs/.env secrets/db_password.txt
+git check-ignore -v srcs/.env secrets/
 ```
 
 ### 4. Build and start
@@ -257,6 +260,29 @@ proxies it rather than reading its files, which is why this container shares no
 volume either. Note that busybox's httpd applet is not in the Alpine base image
 — the Dockerfile installs `busybox-extras` — and that it installs no SIGTERM
 handler, hence the `STOPSIGNAL SIGKILL` line that keeps `make down` fast.
+
+### FTP (vsftpd)
+
+vsftpd runs in the foreground as PID 1. The password comes from the
+`ftp_password` secret and is applied at startup by `tools/setup.sh`, which
+then `exec`s vsftpd. No user is created: the FTP account is `nobody`, which
+already owns `/var/www/html`, so no ownership or permission change is needed.
+
+Two settings exist only to work around Alpine specifics, and both are
+commented in `conf/vsftpd.conf`:
+
+- `check_shell=NO` — Alpine builds vsftpd without PAM, so vsftpd checks the
+  account's shell against `/etc/shells` itself. `nobody` uses `/sbin/nologin`,
+  which is deliberately not listed there.
+- `seccomp_sandbox=NO` — vsftpd's sandbox misbehaves on musl.
+
+Passive mode uses ports 21100-21105, published as-is on the host, and
+`pasv_address` is fixed to `127.0.0.1`. Connecting from another machine would
+require changing that address: vsftpd would otherwise advertise its internal
+`172.x` address, which no external client can reach.
+
+This is the only service besides nginx that publishes ports. FTP is not HTTP,
+so nginx cannot proxy it.
 
 ## Troubleshooting
 

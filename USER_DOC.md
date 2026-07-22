@@ -80,6 +80,27 @@ Once logged in, the `wp_posts` table holds the site's articles.
 A static HTML page summarising this project, served by busybox httpd behind the
 same nginx. It contains no PHP and no database access.
 
+### File access — FTP on port 21
+
+The WordPress directory is also reachable over FTP, from the machine running
+the stack:
+
+| Field    | Value       |
+|----------|-------------|
+| Host     | `127.0.0.1` |
+| Port     | `21`        |
+| Username | `nobody`    |
+| Password | the content of `secrets/ftp_password.txt` |
+| Mode     | passive     |
+
+Files dropped there appear on the site immediately: uploading `notes.txt`
+makes it available at `https://jbarthel.42.fr/notes.txt`.
+
+The username is `nobody` because that is the account the web server itself
+runs as, and it owns every file of the site. Anonymous access is refused.
+FTP sends credentials in clear text, which is why the server is only reachable
+from the local machine.
+
 ## Where the credentials are
 
 **No password is stored in this repository.** They are in the `secrets/`
@@ -91,6 +112,7 @@ directory, which is excluded from version control and never committed.
 | `secrets/db_password.txt` | MariaDB WordPress account |
 | `secrets/wp_admin_password.txt` | WordPress `jbarthel` account |
 | `secrets/wp_user_password.txt` | WordPress `guest` account |
+| `secrets/ftp_password.txt` | FTP account (`nobody`) |
 
 On a fresh installation these files must be created by hand — see `DEV_DOC.md`.
 The reference copies are kept in a password manager, not on disk.

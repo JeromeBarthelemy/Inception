@@ -8,7 +8,7 @@ Inception builds a small WordPress infrastructure from scratch inside a Debian
 virtual machine, orchestrated with Docker Compose. Every image is written by
 hand — no ready-made images are pulled from Docker Hub.
 
-The stack is made of three containers, each running a single service:
+The stack is made of three mandatory containers, each running a single service:
 
 | Service | Role | Exposed |
 |---|---|---|
@@ -26,9 +26,18 @@ machine through `/etc/hosts`. NGINX is the only entrypoint: it listens on port
 Persistent data lives in two named volumes backed by `/home/jbarthel/data`:
 one for the database, one for the WordPress files.
 
-Redis runs as a fourth container and acts as WordPress's object cache: query
-results are kept in memory instead of being re-fetched from MariaDB on every
-page load. It publishes no port and is reachable only from the Docker network.
+Four bonus containers run alongside the mandatory stack:
+
+| Service | Role | Exposed |
+|---|---|---|
+| `redis` | Object cache for WordPress: query results are kept in memory instead of being re-fetched from MariaDB on every page load | none |
+| `adminer` | Web database client, served by nginx on `adminer.jbarthel.42.fr` | none |
+| `static` | Static documentation site, no PHP, reverse-proxied by nginx on `static.jbarthel.42.fr` | none |
+| `ftp` | vsftpd server giving access to the WordPress volume, so files can be dropped straight into the site | `21` and `21100-21105` |
+
+Only `ftp` publishes ports besides nginx: FTP is not HTTP, so nginx cannot
+proxy it. The other three are reachable only through nginx or from inside the
+Docker network.
 
 ### Virtual Machine vs Docker
 
@@ -125,6 +134,7 @@ The repository does not contain any credentials. Before the first build, create
     secrets/db_password.txt
     secrets/wp_admin_password.txt
     secrets/wp_user_password.txt
+    secrets/ftp_password.txt
 
 Each file contains a single password and nothing else. Both `srcs/.env` and
 `secrets/` are git-ignored. See `DEV_DOC.md` for the full procedure.
