@@ -98,10 +98,10 @@ cp .env.example srcs/.env
 
 | Variable | Set it to |
 |---|---|
+| `DOMAIN_NAME` | the domain the site answers on, e.g. `jbarthel.42.fr` — it must match the `server_name` in `srcs/requirements/nginx/conf/docker.conf` and your `/etc/hosts` entry |
 | `MYSQL_DATABASE` | the database name (`wordpress` is fine) |
 | `MYSQL_USER` | the database account WordPress connects with |
 | `WP_TITLE` | the site title |
-| `WP_URL` | `https://` followed by your domain, e.g. `https://jbarthel.42.fr` |
 | `WP_ADMIN_USER` | the administrator login — it must not contain `admin` |
 | `WP_ADMIN_EMAIL` | any valid address |
 | `WP_USER`, `WP_USER_EMAIL` | the second, non-administrator account |
@@ -113,7 +113,7 @@ The file holds no password: those live in `secrets/`.
 > once by `tools/init.sh`, and WordPress records its URL in the database once by
 > `tools/setup.sh`. Editing `srcs/.env` afterwards changes nothing.
 >
-> Getting `WP_URL` wrong is the trap worth knowing: the home page still renders,
+> Getting `DOMAIN_NAME` wrong is the trap worth knowing: the home page still renders,
 > because NGINX serves its first server block when no `server_name` matches, but
 > `/wp-admin` redirects to the recorded URL and becomes unreachable. Either start
 > over from an empty `~/data`, or fix the recorded URL in place:
@@ -365,7 +365,7 @@ with a GET.
 | Container stuck `Restarting` | Read its logs; often a failed dependency at startup |
 | `host not found in upstream` | NGINX started before WordPress had a DNS entry |
 | `rm: Permission denied` on `make fclean` | Data files are owned by in-container users; the recipe needs `sudo` |
-| `/wp-admin` redirects to a domain that does not resolve | `WP_URL` was wrong at the first boot; see "Environment file" |
+| `/wp-admin` redirects to a domain that does not resolve | `DOMAIN_NAME` was wrong at the first boot; see "Environment file" |
 | `readdirent /var/lib/docker/volumes/srcs_db_data/_data: no such file or directory` | A Docker volume outlived its host directory. `docker compose -f srcs/docker-compose.yml down -v`, `docker volume rm srcs_db_data srcs_wp_data`, then `make` |
 
 When testing, never use `curl -s`: it silences connection errors, so a failed
