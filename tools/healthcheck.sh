@@ -1,7 +1,8 @@
 #!/bin/sh
 # Inception stack health check. Run from the repo root.
 COMPOSE="docker compose -f srcs/docker-compose.yml"
-DOMAIN="https://jbarthel.42.fr"
+PORT="${PORT:-443}"
+DOMAIN="https://jbarthel.42.fr:${PORT}"
 fails=0
 
 ok() { printf '  \033[32m[ OK ]\033[0m %s\n' "$1"; }
@@ -45,7 +46,7 @@ code=$(curl -kso /dev/null -w '%{http_code}' "$DOMAIN")
 
 echo "== Bonus vhosts respond =="
 for h in adminer static netdata; do
-    code=$(curl -kso /dev/null -w '%{http_code}' "https://$h.jbarthel.42.fr")
+    code=$(curl -kso /dev/null -w '%{http_code}' "https://$h.jbarthel.42.fr:${PORT}")
     [ "$code" = "200" ] && ok "$h -> $code" || ko "$h -> $code"
 done
 
