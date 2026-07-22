@@ -63,9 +63,18 @@ isolated by kernel features: namespaces partition what the process can see
 consume. There is no second kernel, no boot sequence, no emulated hardware.
 
 The difference is measurable in this project. Stopping the whole stack takes
-about one second, because Docker sends `SIGTERM` to three processes that exit
-immediately. Shutting down the Debian VM that hosts them takes far longer,
+about 2.5 seconds for eight containers, because Docker just signals eight
+processes. Shutting down the Debian VM that hosts them takes far longer,
 because a real kernel has to unmount filesystems and halt devices.
+
+Those 2.5 seconds hide a detail worth knowing. The kernel does not apply the
+default action of a signal to PID 1 — a protection against a stray signal
+killing init. A service that installs no `SIGTERM` handler therefore ignores it
+entirely, and Docker resorts to `SIGKILL` after a ten-second grace period.
+NGINX, MariaDB and php-fpm do install one, since they have connections to drain
+and buffers to flush. busybox `httpd` and `vsftpd` do not, so both carry a
+`STOPSIGNAL SIGKILL` line: they hold no state, and killing them outright costs
+nothing. The same line on MariaDB would be indefensible.
 
 Containers do not replace virtual machines. The isolation is weaker — a kernel
 vulnerability is shared by every container on the host. That is precisely why
@@ -205,7 +214,14 @@ guide rather than as a code generator.
 
 The workflow was deliberate: for each service, the assistant explained what the
 file had to accomplish and why, and I wrote it myself. My drafts were then
-reviewed, and I corrected the mistakes.
+reviewed, and I corrected the mistakes. Every Dockerfile, every service
+configuration file and every init script in `srcs/` was written this way.
+
+Four things were drafted by the assistant at my request rather than written by
+me: the `Makefile`, this documentation, the static site's HTML and CSS, and
+`tools/healthcheck.sh`. I reviewed each of them, and I own the four comparisons
+above — I checked them against what the project actually does, and corrected two
+claims that were wrong.
 
 The assistant was also used to debug three Alpine-specific problems in the
 WordPress and MariaDB images, and to understand why `docker kill` does not
