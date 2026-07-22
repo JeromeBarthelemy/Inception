@@ -81,7 +81,13 @@ services:
     networks:
       - inception
     restart: always
-
+  netdata:
+    build: ./requirements/bonus/netdata
+    image: netdata:1.0
+    container_name: netdata
+    networks:
+      - inception
+    restart: always
 
 networks:
   inception:
