@@ -133,7 +133,7 @@ make
 ```
 
 This creates `/home/jbarthel/data/{mariadb,wordpress}` if needed, builds the
-three images, and starts the stack.
+eight images, and starts the stack.
 
 ## Make targets
 
@@ -256,10 +256,10 @@ delete the host directories, because the volumes are backed by bind mounts.
 
 ## Bonus services
 
-Three optional containers run alongside the mandatory stack. None of them
-publishes a port: Adminer and the static site are served by the same nginx over
-HTTPS on their own subdomain, and Redis is reachable only from the Docker
-network.
+Five optional containers run alongside the mandatory stack. Only the FTP server
+publishes ports: Adminer, the static site and Netdata are served by the same
+nginx over HTTPS on their own subdomain, and Redis is reachable only from the
+Docker network.
 
 ### Redis (object cache)
 

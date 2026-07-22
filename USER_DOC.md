@@ -10,9 +10,14 @@ installed. For installation and development, see `DEV_DOC.md`.
 | NGINX | Serves the site over HTTPS on port 443. The only entrypoint. |
 | WordPress + php-fpm | Runs the site itself. |
 | MariaDB | Stores the site content: articles, pages, users, settings. |
+| Redis | Caches database queries in memory to speed up the site. |
+| Adminer | Web interface to inspect the database. |
+| Static site | A documentation page about this project. |
+| FTP | File access to the WordPress directory. |
+| Netdata | Real-time monitoring dashboard. |
 
-Only NGINX is reachable from outside. The database and php-fpm are only
-reachable from within the Docker network.
+Only NGINX and the FTP server are reachable from outside. The database, php-fpm
+and every other service are only reachable from within the Docker network.
 
 ## Starting and stopping
 
@@ -52,9 +57,9 @@ Two accounts exist:
 
 ## Bonus services
 
-Two additional services are reachable from the browser. Like the main site,
-they need their subdomain to resolve locally — see the `/etc/hosts` step in
-DEV_DOC.md if the pages do not load.
+Three additional services are reachable from the browser, plus an FTP server.
+Like the main site, the browser ones need their subdomain to resolve locally —
+see the `/etc/hosts` step in DEV_DOC.md if the pages do not load.
 
 ### Database administration — https://adminer.jbarthel.42.fr
 
@@ -129,7 +134,7 @@ The reference copies are kept in a password manager, not on disk.
 make ps
 ```
 
-The three containers should show `Up`.
+The eight containers should show `Up`.
 
 ```sh
 curl -kI https://jbarthel.42.fr

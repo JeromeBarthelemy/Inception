@@ -16,8 +16,9 @@ The stack is made of three mandatory containers, each running a single service:
 | `wordpress` | WordPress + php-fpm, no web server of its own | `9000`, internal |
 | `mariadb` | Database, no web server of its own | `3306`, internal |
 
-All three are built `FROM alpine:3.23` — the penultimate stable release, as
-required. The `latest` tag is never used.
+Every image in this project — mandatory and bonus alike — is built
+`FROM alpine:3.23`, the penultimate stable release, as required. The `latest`
+tag is never used.
 
 The site is reachable at `https://jbarthel.42.fr`, which resolves to the local
 machine through `/etc/hosts`. NGINX is the only entrypoint: it listens on port
@@ -26,7 +27,7 @@ machine through `/etc/hosts`. NGINX is the only entrypoint: it listens on port
 Persistent data lives in two named volumes backed by `/home/jbarthel/data`:
 one for the database, one for the WordPress files.
 
-Four bonus containers run alongside the mandatory stack:
+Five bonus containers run alongside the mandatory stack:
 
 | Service | Role | Exposed |
 |---|---|---|
@@ -37,7 +38,7 @@ Four bonus containers run alongside the mandatory stack:
 | `netdata` | Real-time monitoring dashboard, reverse-proxied by nginx on `netdata.jbarthel.42.fr` | none |
 
 Only `ftp` publishes ports besides nginx: FTP is not HTTP, so nginx cannot
-proxy it. The other three are reachable only through nginx or from inside the
+proxy it. The other four are reachable only through nginx or from inside the
 Docker network.
 
 Netdata reports the host machine's CPU and memory, because Docker does not

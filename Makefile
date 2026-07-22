@@ -5,6 +5,8 @@
 COMPOSE   = docker compose -f srcs/docker-compose.yml
 DB_DIR    = $(HOME)/data/mariadb
 WP_DIR    = $(HOME)/data/wordpress
+IMAGES    = mariadb:1.0 wordpress:1.0 nginx:1.0 \
+            redis:1.0 adminer:1.0 static:1.0 ftp:1.0 netdata:1.0
 
 .PHONY: all build up down clean fclean re logs ps
 
@@ -25,7 +27,7 @@ clean: down
 
 fclean: clean
 	sudo rm -rf $(HOME)/data/mariadb $(HOME)/data/wordpress
-	-docker image rm -f mariadb:1.0 wordpress:1.0 nginx:1.0
+	-docker image rm -f $(IMAGES)
 
 re: fclean all
 
