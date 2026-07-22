@@ -50,6 +50,36 @@ Two accounts exist:
 | `jbarthel` | Administrator | Everything: settings, themes, users, content |
 | `guest` | Author | Write and publish their own articles only |
 
+## Bonus services
+
+Two additional services are reachable from the browser. Like the main site,
+they need their subdomain to resolve locally — see the `/etc/hosts` step in
+DEV_DOC.md if the pages do not load.
+
+### Database administration — https://adminer.jbarthel.42.fr
+
+Adminer is a single-file database client, served over HTTPS by the same nginx.
+Log in with:
+
+| Field    | Value      |
+|----------|------------|
+| System   | MySQL      |
+| Server   | `mariadb`  |
+| Username | `wpuser`   |
+| Password | the content of `secrets/db_password.txt` |
+| Database | `wordpress`|
+
+`mariadb` is the container name: the database is never published on a port, so
+it is only reachable from inside the Docker network — which is exactly why
+Adminer runs as a container rather than on your host.
+
+Once logged in, the `wp_posts` table holds the site's articles.
+
+### Documentation site — https://static.jbarthel.42.fr
+
+A static HTML page summarising this project, served by busybox httpd behind the
+same nginx. It contains no PHP and no database access.
+
 ## Where the credentials are
 
 **No password is stored in this repository.** They are in the `secrets/`

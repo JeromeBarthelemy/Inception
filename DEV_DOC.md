@@ -56,10 +56,12 @@ committed to this repository.
 
 ### 1. Domain resolution
 
-The site is served on `jbarthel.42.fr`, which must resolve to the local machine:
+
+The site and its bonus services are served on subdomains of `jbarthel.42.fr`,
+which must all resolve to the local machine:
 
 ```sh
-echo "127.0.0.1 jbarthel.42.fr" | sudo tee -a /etc/hosts
+echo "127.0.0.1 jbarthel.42.fr adminer.jbarthel.42.fr static.jbarthel.42.fr" | sudo tee -a /etc/hosts
 ping -c1 jbarthel.42.fr
 ```
 
@@ -227,6 +229,34 @@ docker exec -it mariadb mariadb -u root -p -e \
 Note that `docker compose down -v` removes the volume declarations but does not
 delete the host directories, because the volumes are backed by bind mounts.
 `make fclean` therefore removes those directories explicitly.
+
+## Bonus services
+
+Three optional containers run alongside the mandatory stack. None of them
+publishes a port: Adminer and the static site are served by the same nginx over
+HTTPS on their own subdomain, and Redis is reachable only from the Docker
+network.
+
+### Redis (object cache)
+
+Redis is wired to WordPress in two places: the `php83-pecl-redis` extension is
+installed in the wordpress image (without it the plugin connects to nothing and
+fails silently), and the first-boot script installs the `redis-cache` plugin,
+sets `WP_REDIS_HOST` to `redis` and enables the drop-in.
+
+docker exec wordpress wp redis status --path=/var/www/html
+### Adminer (database client)
+
+A single PHP file served through php-fpm, on `adminer.jbarthel.42.fr`. nginx
+passes it the script name only, so no volume is shared with this container.
+
+### Static site (documentation)
+
+Plain HTML served by busybox httpd on `static.jbarthel.42.fr`. nginx reverse-
+proxies it rather than reading its files, which is why this container shares no
+volume either. Note that busybox's httpd applet is not in the Alpine base image
+— the Dockerfile installs `busybox-extras` — and that it installs no SIGTERM
+handler, hence the `STOPSIGNAL SIGKILL` line that keeps `make down` fast.
 
 ## Troubleshooting
 

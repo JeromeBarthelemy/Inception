@@ -26,6 +26,10 @@ machine through `/etc/hosts`. NGINX is the only entrypoint: it listens on port
 Persistent data lives in two named volumes backed by `/home/jbarthel/data`:
 one for the database, one for the WordPress files.
 
+Redis runs as a fourth container and acts as WordPress's object cache: query
+results are kept in memory instead of being re-fetched from MariaDB on every
+page load. It publishes no port and is reachable only from the Docker network.
+
 ### Virtual Machine vs Docker
 
 A virtual machine emulates a complete computer: it boots its own kernel on top
@@ -110,7 +114,7 @@ rebuild" would silently restart on the old database.
 
 - Docker Engine and the Docker Compose plugin
 - `make`
-- An entry in `/etc/hosts`: `127.0.0.1 jbarthel.42.fr`
+- An entry in `/etc/hosts`: `127.0.0.1 jbarthel.42.fr adminer.jbarthel.42.fr static.jbarthel.42.fr`
 
 ### Setup
 
