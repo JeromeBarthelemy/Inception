@@ -1,7 +1,7 @@
-# Secrets et variables d'environnement — JAMAIS dans git
+# Secrets and environment variables — NEVER in git
 srcs/.env
 secrets/
 
-# Fichiers système / éditeurs
+# System / editor files
 .DS_Store
 *.swp

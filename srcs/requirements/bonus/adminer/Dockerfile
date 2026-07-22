@@ -1,13 +1,12 @@
 FROM alpine:3.23
 
-# php-fpm + extensions                                              
+# php-fpm + extensions
 RUN apk add --no-cache \
     php83 \
     php83-fpm \
     php83-mysqli \
-
-curl \
-    php83-session  
+    php83-session \
+    curl
 
 # Adminer download
 RUN mkdir -p /var/www/html && curl -fsSL -o /var/www/html/index.php \
