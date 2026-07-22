@@ -75,8 +75,20 @@ else
 fi
 
 echo "== Network =="
-n=$(docker network inspect srcs_inception -f '{{len .Containers}}' 2>/dev/null)
-[ "$n" = "8" ] && ok "8 containers on srcs_inception" || ko "${n:-0} on srcs_inception (want 8)"
+n=0
+i=0
+while [ $i -lt 30 ]; do
+    n=$(docker network inspect srcs_inception -f '{{len .Containers}}' 2>/dev/null)
+    [ "$n" = "8" ] && break
+    i=$((i + 1))
+    sleep 1
+done
+if [ "$n" = "8" ]; then
+    ok "8 containers on srcs_inception"
+else
+    ko "${n:-0} on srcs_inception (want 8)"
+    docker network inspect srcs_inception -f '{{range .Containers}}{{.Name}} {{end}}'
+fi
 
 echo "== Volumes =="
 for v in srcs_db_data srcs_wp_data; do
