@@ -30,17 +30,21 @@ once, on the **host**, with the VM powered off:
 ```bash
 VBoxManage modifyvm "Inception" --natpf1 "SSH,tcp,,2222,,22"
 VBoxManage showvminfo "Inception" | grep -i "NIC 1 Rule"
+```
 
 Inside the guest, the SSH server must be installed and enabled:
 
+```bash
 sudo apt install openssh-server
 sudo systemctl enable --now ssh
 systemctl is-active ssh
+```
 
 Then, from the host:
 
+```bash
 ssh -p 2222 jbarthel@localhost
-
+```
 The port forwarding rule is VirtualBox configuration, stored on the host. It is
 not part of this repository and has to be recreated on any machine where the VM
 is imported.
